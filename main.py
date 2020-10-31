@@ -6,10 +6,13 @@ Created on Oct 27, 2020
 import copy
 import abc
 import time
+import gc
 
 #debug_stuff
 copy_time = 0
 try_place_piece_time = 0
+square_creation_time = 0
+check_uniqueness_time = 0
 
 class UnavailableSquareException(BaseException):
     pass
@@ -21,7 +24,11 @@ class Movement(object):
     
 class Square(object):
     def __init__(self, row, column):
+        global square_creation_time
+        t0 = time.time()
         self.row, self.column = row, column
+        t1 = time.time()
+        square_creation_time += t1-t0
     def __add__(self, direction_list): #TODO not __add__ this is not proper here
         return Square(self.row + direction_list[0], self.column + direction_list[1])
     def __str__(self):
@@ -105,10 +112,15 @@ class Board(object):
     def Copy(self):
         global copy_time
         t0 = time.time()
-        r = copy.deepcopy(self)
+        #res = copy.deepcopy(self)
+        res = Board(0,0)
+        res.rows = self.rows
+        res.columns = self.columns
+        for r in xrange(self.rows):
+            res.board.append(list(self.board[r]))
         t1 = time.time()
         copy_time += t1-t0
-        return r
+        return res
         
     def GetAvailSquares(self):
         res = []
@@ -171,25 +183,34 @@ def CheckIfAlreadyASolution(results, board):
 def CalcSolutionForPieces(curboard, pieces, results=[]):
     
     if len(pieces) == 0:
-        if not CheckIfAlreadyASolution(results, curboard):
+        #gc.collect()
+
+        global check_uniqueness_time
+        t0 = time.time()
+
+        if True or not CheckIfAlreadyASolution(results, curboard):
             results.append(curboard.Copy())
             #print "added solution #%i\n" %len(results)
+        t1 = time.time()
+        check_uniqueness_time += t1-t0
     else:
         avsq = curboard.GetAvailSquares()
         for sq in avsq:
-            if len(pieces) == 3:
+            board = curboard.Copy()
+            if len(pieces) == 6:
                 print "try first piece sq: %s" % sq
             try:
-                board = curboard.Copy()
+                #board = curboard.Copy()
                 global try_place_piece_time
                 t0 = time.time()
                 board.TryPlacePiece(pieces[0], sq)
+                
                 t1 = time.time()
                 try_place_piece_time += (t1-t0)
                 #piece = pieces[0]
                 #remainingPieces = pieces[1:]
                 CalcSolutionForPieces(board, pieces[1:], results)
-                                   
+                #board = curboard.Copy()          
             except UnavailableSquareException: 
                 continue
     
@@ -206,8 +227,8 @@ if __name__ == '__main__':
     starttime = time.time()
     #res = main(3,3,[King(), King(), Rook()])
     #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
-    #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
-    res = main(5,6,[King(), Knight(), Rook()])
+    res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
+    #res = main(5,6,[King(), Knight(), Rook()])
     endtime = time.time()
     for b in res:
         print b  
@@ -215,6 +236,8 @@ if __name__ == '__main__':
     print "Time to compute: %s" % str(endtime-starttime)
     print "copy_time %s" % str(copy_time)
     print "try_place_piece in loop %s" % str(try_place_piece_time)
+    print "square_creation_time %s" % str(square_creation_time)
+    print "check_uniqueness_time %s" % str(check_uniqueness_time)
     
     
     
