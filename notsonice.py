@@ -155,7 +155,7 @@ if __name__ == '__main__':
     #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
     #res = main(5,6,[King(), Knight(), Rook()])
     #res = main(3,3, "KKR")
-    res = main(6,6, "QRBNKK")
+    res = main(4,4, "RRNNNN")
     endtime = time.time()
     #for b in res:
     #    print b  
