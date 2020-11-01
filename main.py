@@ -226,9 +226,9 @@ def main(rows, columns, pieces):
 if __name__ == '__main__':
     starttime = time.time()
     #res = main(3,3,[King(), King(), Rook()])
-    res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
+    #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
     #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
-    #res = main(5,6,[King(), Knight(), Rook()])
+    res = main(5,5,[King(), King(), Queen(), Bishop(), Knight(), Rook()])
     endtime = time.time()
     for b in res:
         print b  
