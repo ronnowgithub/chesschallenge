@@ -235,94 +235,41 @@ class Board(object):
     def __repr__(self):
         return self.__str__()
     
-class Results(object):
-    def __init__(self, hashmax):
-        self.hashtable = {}
-        for i in xrange(hashmax):
-            self.hashtable[i] = []
-            
-    def AppendResult(self, result):
-        self.hashtable[result.hashvalue].append(result)        
-        
-    def AlreadyASolution(self, results, config):
-        #return False
-        for res in self.hashtable[config.hashvalue]:
-            if res.__str__() == config.__str__():
-                return True
-        return False
-        
-    def __iter__(self):
-        self.curhashvalue = 0
-        self.cur_listindex = 0
-        return self
-    def __next__(self):
-        while True:
-            if self.curhashvalue >= len(self.hashtable):
-                raise StopIteration
-            if self.cur_listindex < len(self.hashtable[self.curhashvalue]):
-                self.cur_listindex += 1
-                return self.hashtable[self.curhashvalue][self.cur_listindex - 1]
-            else:
-                self.curhashvalue += 1
-                self.cur_listindex = 0
-                
 
-                
-            
-        if self.cur_listindex >= len(self.hashtable[self.curhashvalue]):
-            self.curhashvalue +=1
-            if self.curhashvalue >= len(self.hashtable):
-                raise StopIteration
-            else:
-                self.cur_listindex
-
-    def __len__(self):
-        res = 0
-        for x in self.hashtable:
-            res += len(self.hashtable[x])
-        return res
-
-
-def CalcSolutionForPieces(curboard, pieces, results):
-    
+def CalcSolutionForPieces(curboard, pieces):
+    results = 0
     if len(pieces) == 0:
-        t0 = time.time()
-        cfg = curboard.GetConfiguraton()
-        if not results.AlreadyASolution(results, cfg):
-            results.AppendResult(cfg)
-        t1 = time.time()
-        global check_uniqueness_time
-        check_uniqueness_time += t1-t0
+        return 1
     else:
         avsq = curboard.GetAvailSquares()
         for sq in avsq:
             try:
                 curboard.TryPlacePiece(pieces[0], sq)
-                CalcSolutionForPieces(curboard, pieces[1:], results)
+                results += CalcSolutionForPieces(curboard, pieces[1:])
                 curboard.RemoveLastPiece()
             except UnavailableSquareException: 
                 continue
-    
+    return results
 
 def main(rows, columns, pieces):
-    result_boards = Results(256)
     curboard = Board(rows, columns)
-    CalcSolutionForPieces(curboard, pieces, result_boards)
-    return result_boards
+    results = CalcSolutionForPieces(curboard, pieces)
+    return results
         
         
 
 if __name__ == '__main__':
     starttime = time.time()
-    #es = main(3,3,[King(), King(), Rook()])
+    #res = main(3,3,[King(), King(), Rook()])
     #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
-    res = main(6,6,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
+    #res = res / (2*(4*2*3))
+    res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
     #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
     #res = main(7,6,[King(), Knight(), Rook()])
     endtime = time.time()
     #for b in res:
     #    print b  
-    print "# unique solutions: %i" % len(res)
+    print "# unique solutions: %i" % res
     print "Time to compute: %s" % str(endtime-starttime)
     print "check_uniqueness_time %s" % str(check_uniqueness_time)
     print "get_board_layout_time %s" % str(get_board_layout_time)
