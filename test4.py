@@ -9,6 +9,9 @@ from math import factorial
 class UnavailableSquareException(BaseException):
     pass
 
+# Definition of Chess Pieces and stuff. Truely overkill
+# anywaym each piece knows it's own movement.
+# movement is a list of indicated directions, and a bool to indicate if we need to follow directions
 class Movement(object):
     def __init__(self, directions, restricted=False):
         self.directions = directions
@@ -57,38 +60,52 @@ class Rook(Piece):
         rookmoves = [[1,0],[0,-1],[0,1],[-1,0]]
         return Movement(rookmoves, False)
 
+# --------------------------
+# This guy is important
+# a square is always a tuole (row, column)
+# if a solution is made, we only want to keep track of where pieces are plased
+# bla bla
 class BoardPiece(object):
     def __init__(self, piece, square):
         self.piece = piece
         self.square = square
-        
-    def SetSquare(self, square, bounds):
-        pass
+#mostly for debugging - could be removed  
     def __str__(self):
         return self.piece.symbol + str(self.square)
     def __repr__(self):
         return self.__str__()
-    
+
+# --------------------------
+# This guy is key
+# a square is always a tuole (row, column)
+#  - we have TryAddPiece, which will add a piece to the square if possible
+#  - we have GetAvailSquares; returns a list of squares that is available for placing a piece
+#  - And then RemoveLastPiece; if we need to move on, the last piece of a solution we have to rm
+#  - and some helper funcs...
+#  - attackmap is a map of the board indicating (how many) a squaare is attacked. Useful for calcullating avail squarres
 class Board(object):
-    def _inbounds(self, square):
-        if square[0] >= 0 and square[0] < self.rows and square[1] >= 0 and square[1] < self.columns:
-            return True
-        return False
-    def _isSquareOccupied(self, square):
-        for pcs in self.pieces:
-            if pcs.square == square:
-                return True
-        return False
-    def _isSquareAttacked(self, square):
-        return self.attackmap[square[0]][square[1]] > 0
-                
     def __init__(self, rows, columns, boardpieces=[]):
         self.pieces = []
         self.rows, self.columns = rows, columns
         self.attackmap = [[0] * columns for _ in xrange(rows)]
         for pcs in boardpieces:
             self.TryPlacePiece(pcs.piece, pcs.square)
-        
+    
+    def _inbounds(self, square):
+        if square[0] >= 0 and square[0] < self.rows and square[1] >= 0 and square[1] < self.columns:
+            return True
+        return False
+    
+    def _isSquareOccupied(self, square):
+        for pcs in self.pieces:
+            if pcs.square == square:
+                return True
+        return False
+    
+    def _isSquareAttacked(self, square):
+        return self.attackmap[square[0]][square[1]] > 0
+                
+
     def GetAvailSquares(self):
         res = []
         for row in xrange(self.rows):
@@ -111,19 +128,15 @@ class Board(object):
     def RemoveLastPiece(self):
         bpcs = self.pieces.pop()
         for sq in self._getSquaresToCheck(bpcs.piece, bpcs.square):
-            self.attackmap[sq[0]][sq[1]] -= 1
-        
+            self.attackmap[sq[0]][sq[1]] -= 1     
         
     def _getSquaresToCheck(self, piece, square):
-        #TODO We can already abandon search if we find a piece - obvious place to optimize
         res = []
         movement = piece.Moves()
         #sq = (square[0], square[1])
         for direction in movement.directions:
             sq = (square[0] + direction[0], square[1] + direction[1])
             while self._inbounds(sq):
-#                if isinstance(self._getSquare(sq), Piece):
-#                    return []
                 res.append(sq)
                 if movement.restricted:
                     break
@@ -131,19 +144,9 @@ class Board(object):
                     sq = (sq[0] + direction[0], sq[1] + direction[1])
         return res         
     
-    def __str__(self):
-        res = '\n'
-        s = ", ".join(map(str, self.pieces))
-        s+= '\n'
-        res += s
-        for r in self.attackmap:
-            res +=  "|".join(map(str,r))
-            res += '\n'
-        return res
-    def __repr__(self):
-        return self.__str__()
-    
-
+# The main loop
+# recursive, just place a piece on any free suare? Of course break out when we do have a solution
+# it will return the number of results found - yep all results regardless of dup's
 def CalcSolutionForPieces(curboard, pieces):
     results = 0
     if len(pieces) == 0:
@@ -159,6 +162,13 @@ def CalcSolutionForPieces(curboard, pieces):
                 continue
     return results
 
+
+# from our "main loop" we will get ALL possible results. 
+# this is only true if all pieces are of distinct kinds.
+# So the number of results need to get adjusted for that,,,
+# Doh! not to sure, but each piece of a kind will permute in the final solution set. So we divide for that!
+# but that's the mutant factor
+ 
 def main(rows, columns, pieces):
     def _calc_mutant_factor():
         mutantcalc = {}
@@ -175,7 +185,7 @@ def main(rows, columns, pieces):
         
     curboard = Board(rows, columns)
     
-        
+       
     results = CalcSolutionForPieces(curboard, pieces)
     return results / _calc_mutant_factor()
         
@@ -183,16 +193,9 @@ def main(rows, columns, pieces):
 
 if __name__ == '__main__':
     starttime = time.time()
-    #res = main(3,3,[King(), King(), Rook()])
     #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
-    #res = main(6,6,[Queen(), Queen(), King(), King(), Bishop(), Bishop(), Knight()])
-    #res = res / (2*(4*2*3))
     res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
-    #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
-    #res = main(5,5,[King(), King(), Queen(), Bishop(), Knight(), Rook()])
     endtime = time.time()
-    #for b in res:
-    #    print b  
     print "# unique solutions: %i" % res
     print "Time to compute: %s" % str(endtime-starttime)
     
