@@ -5,6 +5,7 @@ Created on Oct 27, 2020
 '''
 import time
 from math import factorial
+xrange = range
 
 class UnavailableSquareException(BaseException):
     pass
@@ -193,11 +194,14 @@ def main(rows, columns, pieces):
 
 if __name__ == '__main__':
     starttime = time.time()
-    #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
-    res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
+    res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
+    #res = main(4, 4, [Knight(), Rook()])
+
+    #org problem
+    #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
     endtime = time.time()
-    print "# unique solutions: %i" % res
-    print "Time to compute: %s" % str(endtime-starttime)
+    print ("# unique solutions: %i" % res)
+    print ("Time to compute: %s" % str(endtime-starttime))
     
     
     
