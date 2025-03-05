@@ -119,7 +119,8 @@ class Board(object):
     
     def TryPlacePiece(self, piece, square):
         squares_to_check = self._getSquaresToCheck(piece, square)
-        if squares_to_check == [] or any(map(lambda sq: self._isSquareOccupied(sq), squares_to_check)):
+#        if squares_to_check == [] or any(map(lambda sq: self._isSquareOccupied(sq), squares_to_check)):
+        if any(map(lambda sq: self._isSquareOccupied(sq), squares_to_check)):
             raise UnavailableSquareException()
         else:
             self.pieces.append(BoardPiece(piece, square))
@@ -143,7 +144,19 @@ class Board(object):
                     break
                 else:
                     sq = (sq[0] + direction[0], sq[1] + direction[1])
-        return res         
+        return res  
+    def __str__(self):
+        res = '\n'
+        s = ", ".join(map(str, self.pieces))
+        s+= '\n'
+        res += s
+        for r in self.attackmap:
+            res +=  "|".join(map(str,r))
+            res += '\n'
+        return res
+    def __repr__(self):
+        return self.__str__()
+
     
 # The main loop
 # recursive, just place a piece on any free suare? Of course break out when we do have a solution
@@ -181,12 +194,8 @@ def main(rows, columns, pieces):
                 mutantcalc[pcs.symbol] = 1
         for m in mutantcalc:
             mutantfactor *= factorial(mutantcalc[m])
-            
-        return mutantfactor    
-        
+        return mutantfactor
     curboard = Board(rows, columns)
-    
-       
     results = CalcSolutionForPieces(curboard, pieces)
     return results / _calc_mutant_factor()
         
@@ -194,8 +203,12 @@ def main(rows, columns, pieces):
 
 if __name__ == '__main__':
     starttime = time.time()
-    res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
+    #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
     #res = main(4, 4, [Knight(), Rook()])
+    res = main(3, 3, [Knight(), Bishop()])
+    #res = main(3, 3, [Queen()])
+    #res = main(3, 3, [Rook(), Rook(), Rook()])
+    #res = main(8, 8, [Queen(), Queen(), Queen(), Queen(), Queen(), Queen(), Queen(), Queen()])
 
     #org problem
     #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
