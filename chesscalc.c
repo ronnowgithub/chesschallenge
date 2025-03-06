@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#define API
+#ifdef _WIN32 
+    #define API __declspec(dllexport)
+#else
+    #define API
+#endif
 
 char RowColDiagMoves[][2] = {{0,-1}, {-1,0}, {0,1}, {1,0}, {1,-1}, {-1,-1}, {-1,1}, {1,1}};
 char RowColMoves[][2] = {{0,-1}, {-1,0}, {0,1}, {1,0}};
