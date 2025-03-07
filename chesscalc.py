@@ -4,6 +4,7 @@ Created on Oct 27, 2020
 @author: lars
 '''
 import time
+import sys
 from math import factorial
 xrange = range
 
@@ -202,16 +203,49 @@ def main(rows, columns, pieces):
         
 
 if __name__ == '__main__':
+    def constructPiecesFromStr(pieces: str) -> list:
+        rval = []
+        constructorArr = {
+            "K": King(),
+            "Q": Queen(),
+            "N": Knight(),
+            "B": Bishop(),
+            "R": Rook()
+        }
+        for piece in pieces:
+            rval.append(constructorArr[piece])
+        return rval
+
+    rows = 6
+    cols = 9
+    pieces = "QRBNKK"
+
+    try:
+        args = sys.argv[1:]
+        if 3 == len(args):
+            rows = int(args[0])
+            cols = int(args[1])
+            pieces = args[2]
+        elif 0 != len(args):
+            raise Exception() 
+    except(Exception):
+        print("Input was wrong. Use either no args or rows cols pieces\n")
+        exit (1)
+
+    argsToMain = [rows, cols, constructPiecesFromStr(pieces)]
     starttime = time.time()
+
+    res = main(*argsToMain)
     #res = main(4,4,[Rook(), Rook(), Knight(), Knight(), Knight(), Knight()])
     #res = main(4, 4, [Knight(), Rook()])
-    res = main(3, 3, [Knight(), Bishop()])
+    #res = main(3, 3, [Knight(), Bishop()])
     #res = main(3, 3, [Queen()])
     #res = main(3, 3, [Rook(), Rook(), Rook()])
     #res = main(8, 8, [Queen(), Queen(), Queen(), Queen(), Queen(), Queen(), Queen(), Queen()])
 
     #org problem
     #res = main(6,9,[Queen(), Rook(), Bishop(), Knight(), King(), King()])
+    
     endtime = time.time()
     print ("# unique solutions: %i" % res)
     print ("Time to compute: %s" % str(endtime-starttime))
