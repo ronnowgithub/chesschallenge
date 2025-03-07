@@ -11,7 +11,7 @@ Takes a while depending on your HW (like 9 minutes on a 10+ years old laptop)
 
 python chesscalc.py M N pieces will run with the specified e.g 3 3 RRR
 
-The algorithm/implementation can be seriously optimized, but that was not the excercise.
+The algorithm/implementation I implemented can be optimized, but as it was well in the limits I didn't spend time optimizing.
 However, the (almost) extreme way is to do it in c.
 
 --- 
