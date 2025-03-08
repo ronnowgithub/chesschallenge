@@ -64,7 +64,7 @@ class Rook(Piece):
 
 # --------------------------
 # This guy is important
-# a square is always a tuole (row, column)
+# a square is always a tuple (row, column)
 # if a solution is made, we only want to keep track of where pieces are plased
 # bla bla
 class BoardPiece(object):
@@ -79,7 +79,7 @@ class BoardPiece(object):
 
 # --------------------------
 # This guy is key
-# a square is always a tuole (row, column)
+# a square is always a tuple (row, column)
 #  - we have TryAddPiece, which will add a piece to the square if possible
 #  - we have GetAvailSquares; returns a list of squares that is available for placing a piece
 #  - And then RemoveLastPiece; if we need to move on, the last piece of a solution we have to rm
